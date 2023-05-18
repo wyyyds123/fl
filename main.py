@@ -74,8 +74,6 @@ def get_weather(region):
     response = get(url, headers=headers).json() 
     if response["code"] == "200": 
         # 空气质量
-import requests
-
 API_URL = "https://api.example.com"
 
 
