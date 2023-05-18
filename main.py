@@ -74,42 +74,42 @@ def get_weather(region):
     response = get(url, headers=headers).json() 
     if response["code"] == "200": 
         # 空气质量
-        category = response["now"]["category"]
-        # pm2.5
-        pm2p5 = response["now"]["pm2p5"]
-    else:
-        # 国外城市获取不到数据
-        category = ""
-        pm2p5 = ""
-    id = random.randint(1, 16)
-    url = "https://devapi.qweather.com/v7/indices/1d?location={}&key={}&type={}".format(location_id, key, id)
-    response = get(url, headers=headers).json()
-    proposal = ""
-    if response["code"] == "200":
-        proposal += response["daily"][0]["text"]
-    return weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5, proposal
+import requests
+
+API_URL = "https://api.example.com"
 
 
-def get_tianhang():
+def get_weather_data(city: str) -> dict:
+    """获取城市天气数据"""
+    url = f"{API_URL}/weather?city={city}"
     try:
-        key = config["tian_api"]
-        url = "http://api.tianapi.com/caihongpi/index?key={}".format(key)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
-            'Content-type': 'application/x-www-form-urlencoded'
-
-        }
-        response = get(url, headers=headers).json()
-        if response["code"] == 200:
-            chp = response["newslist"][0]["content"]
-        else:
-            chp = ""
-    except KeyError:
-        chp = ""
-    return chp
+        response = requests.get(url)
+        data = response.json()
+        return data
+    except (requests.exceptions.RequestException, ValueError):
+        return {}
 
 
+def show_weather(city: str) -> None:
+    """展示城市天气信息"""
+    data = get_weather_data(city)
+    
+    if not data:
+        print(f"获取{city}的天气数据失败")
+    elif 'error' in data:
+        print(data['message'])
+    else:
+        temp = data['main']['temp']
+        humidity = data['main']['humidity']
+        wind = data['wind']['speed']
+        desc = data['weather'][0]['description']
+        print(f"{city}的天气情况：{desc}，温度：{temp}℃，湿度：{humidity}%，风速：{wind}m/s")
+
+
+if __name__ == '__main__':
+    city_name = input("请输入城市名称（中英文均可）：")
+    show_weather(city_name)
+    #修改至此
 def get_birthday(birthday, year, today):
     birthday_year = birthday.split("-")[0]
     # 判断是否为农历生日
